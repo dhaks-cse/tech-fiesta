@@ -1,5 +1,10 @@
 // Type definitions for events and workshops
 
+export interface Coordinator {
+  name: string;
+  phone: string;
+}
+
 export interface Event {
   id: number;
   title: string;
@@ -15,6 +20,9 @@ export interface Event {
   image?: string;
   price?: string; // Optional field for event price
   maxTeamSize?: number; // Maximum team size for events that allow teams
+  minTeamSize?: number; // Minimum team size for events that require teams
+  coordinators?: Coordinator[];
+  rulebookPath?: string;
 }
 
 export interface Workshop {
@@ -35,6 +43,8 @@ export interface Workshop {
   price: string;
   tags?: string[];
   syllabus?: string[];
+  coordinators?: Coordinator[];
+  rulebookPath?: string;
 }
 
 // Registration types

@@ -165,7 +165,7 @@ export default function RegistrationForm({
 
   const totalPrice = calculateTotalPrice();
 
-  // Check if any selected events require teams and get the maximum team size allowed
+  // Check if any selected events require teams and get the maximum/minimum team size allowed
   const getTeamRequirements = () => {
     const selectedEventsWithTeamLimits = formData.selectedEvents
       .map(selectedEvent => events.find(e => e.id === selectedEvent.id))
@@ -173,14 +173,20 @@ export default function RegistrationForm({
 
     const allTeamEvents = selectedEventsWithTeamLimits;
     
-    if (allTeamEvents.length === 0) {
-      return { requiresTeam: false, maxTeamSize: 1 };
+    // Only count as team events if the maxTeamSize is > 1
+    const actualTeamEvents = allTeamEvents.filter(event => event.maxTeamSize! > 1);
+    
+    if (actualTeamEvents.length === 0) {
+      return { requiresTeam: false, maxTeamSize: 1, minTeamSize: 1 };
     }
 
     // Get the minimum maxTeamSize among selected events (most restrictive)
-    const maxTeamSize = Math.min(...allTeamEvents.map(event => event.maxTeamSize!));
+    const maxTeamSize = Math.min(...actualTeamEvents.map(event => event.maxTeamSize!));
     
-    return { requiresTeam: true, maxTeamSize };
+    // Get the maximum minTeamSize among selected events (most restrictive / highest minimum)
+    const minTeamSize = Math.max(...actualTeamEvents.map(event => event.minTeamSize || 1));
+    
+    return { requiresTeam: true, maxTeamSize, minTeamSize };
   };
 
   const teamRequirements = getTeamRequirements();
@@ -198,19 +204,48 @@ export default function RegistrationForm({
   }, [selectedNonTechEvents]);
 
   useEffect(() => {
-    setFormData(prev => ({ 
-      ...prev, 
-      isTeamEvent: teamRequirements.requiresTeam,
-      // Adjust team size if it exceeds the new limit
-      teamSize: teamRequirements.requiresTeam 
-        ? Math.min(prev.teamSize || 1, teamRequirements.maxTeamSize)
-        : 1,
-      // Remove excess team members if team size is reduced
-      teamMembers: teamRequirements.requiresTeam && prev.teamMembers
-        ? prev.teamMembers.slice(0, Math.max(0, teamRequirements.maxTeamSize - 1))
-        : []
-    }));
-  }, [teamRequirements.requiresTeam, teamRequirements.maxTeamSize]);
+    if (teamRequirements.requiresTeam) {
+      const minSize = teamRequirements.minTeamSize;
+      const maxSize = teamRequirements.maxTeamSize;
+      
+      // Determine new team size
+      let newTeamSize = formData.teamSize || 1;
+      if (newTeamSize < minSize) {
+        newTeamSize = minSize;
+      } else if (newTeamSize > maxSize) {
+        newTeamSize = maxSize;
+      }
+      
+      // Adjust teamMembers array to match newTeamSize - 1
+      const requiredMemberCount = newTeamSize - 1;
+      let newTeamMembers = [...(formData.teamMembers || [])];
+      
+      if (newTeamMembers.length < requiredMemberCount) {
+        // Add empty members
+        const diff = requiredMemberCount - newTeamMembers.length;
+        for (let i = 0; i < diff; i++) {
+          newTeamMembers.push({ name: "", department: "", year: "", email: "", whatsapp: "" });
+        }
+      } else if (newTeamMembers.length > requiredMemberCount) {
+        // Truncate excess members
+        newTeamMembers = newTeamMembers.slice(0, requiredMemberCount);
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        isTeamEvent: true,
+        teamSize: newTeamSize,
+        teamMembers: newTeamMembers
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        isTeamEvent: false,
+        teamSize: 1,
+        teamMembers: []
+      }));
+    }
+  }, [teamRequirements.requiresTeam, teamRequirements.maxTeamSize, teamRequirements.minTeamSize]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleInputChange = (field: keyof RegistrationFormData, value: any) => {
@@ -278,6 +313,11 @@ export default function RegistrationForm({
   };
 
   const removeTeamMember = (index: number) => {
+    const currentTeamSize = formData.teamSize || 1;
+    if (currentTeamSize <= teamRequirements.minTeamSize) {
+      toast.error(`Minimum team size for selected events is ${teamRequirements.minTeamSize} members.`, { duration: 4000 });
+      return;
+    }
     setFormData(prev => ({
       ...prev,
       teamMembers: (prev.teamMembers || []).filter((_, i) => i !== index),
@@ -305,6 +345,9 @@ export default function RegistrationForm({
     // Team member validation
     if (formData.isTeamEvent && formData.teamMembers) {
       const currentTeamSize = formData.teamSize || 1;
+      if (currentTeamSize < teamRequirements.minTeamSize) {
+        newErrors.teamSize = `Team size must be at least ${teamRequirements.minTeamSize} members for selected events`;
+      }
       if (currentTeamSize > teamRequirements.maxTeamSize) {
         newErrors.teamSize = `Team size cannot exceed ${teamRequirements.maxTeamSize} members for selected events`;
       }
@@ -688,7 +731,11 @@ export default function RegistrationForm({
                         <span className="text-white font-medium group-hover:text-red-300 transition-colors break-words">{event.title}</span>
                         {event.maxTeamSize && (
                           <span className="text-xs bg-red-500/20 text-red-300 px-2 py-1 rounded whitespace-nowrap">
-                            Team: max {event.maxTeamSize}
+                            {event.maxTeamSize === 1
+                              ? "Solo"
+                              : event.minTeamSize && event.minTeamSize === event.maxTeamSize
+                              ? `Team: ${event.maxTeamSize}`
+                              : `Team: ${event.minTeamSize || 1} - ${event.maxTeamSize}`}
                           </span>
                         )}
                       </div>
@@ -743,7 +790,18 @@ export default function RegistrationForm({
                       className="w-5 h-5 text-amber-600 bg-black/40 border border-red-500/30 rounded focus:ring-red-500/50 focus:ring-offset-black flex-shrink-0 mt-1 cursor-pointer"
                     />
                     <div className="flex-1 min-w-0">
-                      <span className="text-white font-medium group-hover:text-amber-300 transition-colors block break-words">{event.title}</span>
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className="text-white font-medium group-hover:text-amber-300 transition-colors break-words">{event.title}</span>
+                        {event.maxTeamSize && (
+                          <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded whitespace-nowrap">
+                            {event.maxTeamSize === 1
+                              ? "Solo"
+                              : event.minTeamSize && event.minTeamSize === event.maxTeamSize
+                              ? `Team: ${event.maxTeamSize}`
+                              : `Team: ${event.minTeamSize || 1} - ${event.maxTeamSize}`}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-gray-400 text-sm flex flex-wrap items-center gap-1 mt-1">
                         <MapPin className="w-3 h-3 flex-shrink-0" />
                         <span className="break-words">{event.venue}</span>
@@ -761,13 +819,13 @@ export default function RegistrationForm({
               <div className="flex flex-wrap items-center justify-between mb-4 sm:mb-6">
                 <h3 className="text-xl sm:text-2xl font-bold text-white font-[family-name:var(--font-bebas-neue)] tracking-wider">Team Details</h3>
                 <div className="text-sm bg-red-500/20 text-red-300 px-3 py-1 rounded-full">
-                  Max team size: {teamRequirements.maxTeamSize} members
+                  Team size: {teamRequirements.minTeamSize > 1 ? `${teamRequirements.minTeamSize} - ` : ""}{teamRequirements.maxTeamSize} members
                 </div>
               </div>
               <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
                 <p className="text-red-300 text-sm">
                   <strong>Team Required:</strong> The selected events require team participation. 
-                  Please add your team members below (including yourself, max {teamRequirements.maxTeamSize} total).
+                  Please add your team members below (including yourself, {teamRequirements.minTeamSize > 1 ? `minimum ${teamRequirements.minTeamSize} and ` : ""}max {teamRequirements.maxTeamSize} total).
                 </p>
               </div>
               <div className="space-y-4">

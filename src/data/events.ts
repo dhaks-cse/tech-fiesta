@@ -18,6 +18,11 @@ export const events: Event[] = [
     tags: ["Presentation", "Research", "Innovation"],
     image: "/images/project-presentation.jpg",
     price: "₹70",
+    maxTeamSize: 2,
+    rulebookPath: "/rules/events/1.md",
+    coordinators: [
+      { name: "Coordinator", phone: "+91 73055 04045" }
+    ],
   },
 
   {
@@ -28,13 +33,17 @@ export const events: Event[] = [
     time: "10:00 AM - 4:00 PM",
     venue: "Programming Lab",
     description:
-      "A multi-round competition featuring technical quizzes, logical reasoning, debugging tasks, coding rounds, and surprise challenges. Teams are eliminated round by round until only one team survives.",
+      "A multi-round competition featuring technical quizzes, logical reasoning, debugging tasks, coding rounds, and surprise challenges. Participants are eliminated round by round until only one survivor remains.",
     speakers: ["Technical Mentors"],
     capacity: 60,
     registrations: 0,
     tags: ["Quiz", "Coding", "Debugging", "Logic"],
     image: "/images/prompt-engineering.jpg",
     price: "₹70",
+    maxTeamSize: 1,
+    coordinators: [
+      { name: "Coordinator", phone: "+91 94883 63352" }
+    ],
   },
    {
   id: 3,
@@ -59,6 +68,10 @@ export const events: Event[] = [
   image: "/images/ui-challenge.jpg",
   price: "₹70",
   maxTeamSize: 3,
+  minTeamSize: 2,
+  coordinators: [
+    { name: "Coordinator", phone: "+91 99408 19044" }
+  ],
 },
 
   {
@@ -76,7 +89,11 @@ export const events: Event[] = [
     tags: ["Coding", "Algorithms", "Data Structures", "Competition"],
     image: "/images/reverse-code.jpg",
     price: "₹70",
-    maxTeamSize: 4,
+    maxTeamSize: 1,
+    rulebookPath: "/rules/events/4.md",
+    coordinators: [
+      { name: "Coordinator", phone: "+91 63830 28618" }
+    ],
   },
 
   {
@@ -94,7 +111,11 @@ export const events: Event[] = [
     tags: ["Cybersecurity", "AR", "QR", "Treasure Hunt"],
     image: "/images/escape-room.jpg",
     price: "₹70",
-    maxTeamSize: 3,
+    maxTeamSize: 4,
+    rulebookPath: "/rules/events/5.md",
+    coordinators: [
+      { name: "Coordinator", phone: "+91 80156 48112" }
+    ],
   },
 
   {
@@ -105,13 +126,17 @@ export const events: Event[] = [
     time: "2:00 PM - 4:00 PM",
     venue: "Seminar Hall",
     description:
-      "Participants debate trending technology topics such as AI, cybersecurity, startups, coding culture, social media, and future technologies. The event focuses on critical thinking, communication, technical awareness, and teamwork.",
+      "Participants debate trending technology topics such as AI, cybersecurity, startups, coding culture, social media, and future technologies. The event focuses on critical thinking, communication, and technical awareness.",
     speakers: ["Moderators"],
     capacity: 60,
     registrations: 0,
     tags: ["Debate", "Technology", "Communication"],
     image: "/images/try-if-you-can.jpg",
     price: "₹70",
+    maxTeamSize: 1,
+    coordinators: [
+      { name: "Coordinator", phone: "+91 81222 03431" }
+    ],
   },
 
   // Non-Technical Events
@@ -130,6 +155,11 @@ export const events: Event[] = [
     tags: ["Chess", "Strategy", "Competition"],
     image: "/images/photography.jpg",
     price: "₹50",
+    maxTeamSize: 1,
+    rulebookPath: "/rules/events/7.md",
+    coordinators: [
+      { name: "Coordinator", phone: "+91 70223 65387" }
+    ],
   },
 
   {
@@ -147,6 +177,11 @@ export const events: Event[] = [
     tags: ["Meme", "Creativity", "Humor"],
     image: "/images/channel-surfing.jpg",
     price: "₹50",
+    maxTeamSize: 1,
+    rulebookPath: "/rules/events/8.md",
+    coordinators: [
+      { name: "Coordinator", phone: "+91 861 099 7831" }
+    ],
   },
 
   {
@@ -165,6 +200,11 @@ export const events: Event[] = [
     image: "/images/spin-a-yarn.jpg",
     price: "₹50",
     maxTeamSize: 4,
+    minTeamSize: 1,
+    rulebookPath: "/rules/events/9.md",
+    coordinators: [
+      { name: "Coordinator", phone: "+91 90946 90330" }
+    ],
   },
 
   {
@@ -183,6 +223,12 @@ export const events: Event[] = [
     image: "/images/channel-surfing.jpg",
     price: "₹50",
     maxTeamSize: 4,
+    minTeamSize: 1,
+    rulebookPath: "/rules/events/10.md",
+    coordinators: [
+      { name: "Coordinator 1", phone: "+91 733 890 0963" },
+      { name: "Coordinator 2", phone: "+91 96772 32003" }
+    ],
   },
 
   {
@@ -201,6 +247,11 @@ export const events: Event[] = [
     image: "/images/photography.jpg",
     price: "₹50",
     maxTeamSize: 2,
+    minTeamSize: 1,
+    rulebookPath: "/rules/events/11.md",
+    coordinators: [
+      { name: "Coordinator", phone: "+91 73055 04045" }
+    ],
   },
 
   {
@@ -219,6 +270,12 @@ export const events: Event[] = [
     image: "/images/channel-surfing.jpg",
     price: "₹50",
     maxTeamSize: 4,
+    minTeamSize: 4,
+    rulebookPath: "/rules/events/12.md",
+    coordinators: [
+      { name: "Coordinator 1", phone: "+91 8072 246 835" },
+      { name: "Coordinator 2", phone: "+91 81222 03431" }
+    ],
   },
 ];
 
