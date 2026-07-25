@@ -64,7 +64,7 @@ export const workshops: Workshop[] = [
       "OpenCV Setup",
       "Workshop Manual",
     ],
-    capacity: 100,
+    capacity: 93,
     registrations: 0,
     price: "₹101",
     tags: [

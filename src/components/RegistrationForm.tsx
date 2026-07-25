@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { Event, RegistrationFormData, TeamMember, PaymentQR, SelectedItem } from "@/types";
 import { events } from "@/data/events";
@@ -167,7 +166,7 @@ export default function RegistrationForm({
 
   // Check if any selected events require teams and get the maximum/minimum team size allowed
   const getTeamRequirements = () => {
-    const selectedEventsWithTeamLimits = formData.selectedEvents
+    const selectedEventsWithTeamLimits = [...formData.selectedEvents, ...formData.selectedNonTechEvents]
       .map(selectedEvent => events.find(e => e.id === selectedEvent.id))
       .filter((event): event is Event => event !== undefined && event.maxTeamSize !== undefined);
 
@@ -186,7 +185,9 @@ export default function RegistrationForm({
     // Get the maximum minTeamSize among selected events (most restrictive / highest minimum)
     const minTeamSize = Math.max(...actualTeamEvents.map(event => event.minTeamSize || 1));
     
-    return { requiresTeam: true, maxTeamSize, minTeamSize };
+    const hasConflict = minTeamSize > maxTeamSize;
+    
+    return { requiresTeam: true, maxTeamSize, minTeamSize, hasConflict };
   };
 
   const teamRequirements = getTeamRequirements();
@@ -341,11 +342,21 @@ export default function RegistrationForm({
     else if (!validatePhone(formData.whatsapp)) newErrors.whatsapp = "Invalid phone number format";
     if (!formData.college.trim()) newErrors.college = "College name is required";
     if (!formData.year) newErrors.year = "Year of study is required";
+    
+    // Event selection validation - at least one event or workshop must be selected
+    const totalSelections = formData.selectedEvents.length + formData.selectedWorkshops.length + formData.selectedNonTechEvents.length;
+    if (totalSelections === 0) {
+      newErrors.events = "Please select at least one event or workshop to register";
+    }
       
     // Team member validation
     if (formData.isTeamEvent && formData.teamMembers) {
+      if (teamRequirements.hasConflict) {
+        newErrors.teamConflict = "Conflicting team size limits detected. Please register for these events separately.";
+      }
+      
       const currentTeamSize = formData.teamSize || 1;
-      if (currentTeamSize < teamRequirements.minTeamSize) {
+      if (currentTeamSize < teamRequirements.minTeamSize && !teamRequirements.hasConflict) {
         newErrors.teamSize = `Team size must be at least ${teamRequirements.minTeamSize} members for selected events`;
       }
       if (currentTeamSize > teamRequirements.maxTeamSize) {
@@ -824,12 +835,31 @@ export default function RegistrationForm({
               </div>
               <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
                 <p className="text-red-300 text-sm">
-                  <strong>Team Required:</strong> The selected events require team participation. 
-                  Please add your team members below (including yourself, {teamRequirements.minTeamSize > 1 ? `minimum ${teamRequirements.minTeamSize} and ` : ""}max {teamRequirements.maxTeamSize} total).
+                  {teamRequirements.hasConflict ? (
+                    <>
+                      <strong>Conflicting Team Requirements:</strong> You have selected events with incompatible team size limits. For example, one event requires a minimum of {teamRequirements.minTeamSize} members, while another allows a maximum of {teamRequirements.maxTeamSize} members. 
+                      <br /><br />
+                      Since all events in a single registration share the same team, you cannot register for these conflicting events together. Please remove the conflicting events and register for them in a separate form submission.
+                    </>
+                  ) : teamRequirements.minTeamSize > 1 ? (
+                    <>
+                      <strong>Team Required:</strong> The selected events require team participation. 
+                      Please add your team members below (including yourself, minimum {teamRequirements.minTeamSize} and max {teamRequirements.maxTeamSize} total).
+                    </>
+                  ) : (
+                    <>
+                      <strong>Team Optional:</strong> The selected events allow you to participate in a team. 
+                      You can go solo or add up to {teamRequirements.maxTeamSize - 1} team members below (max {teamRequirements.maxTeamSize} total).
+                    </>
+                  )}
                 </p>
               </div>
-              <div className="space-y-4">
-                {(formData.teamMembers || []).map((member, index) => (
+              
+              {errors.teamConflict && <p className="text-red-400 text-sm mb-4 font-semibold">{errors.teamConflict}</p>}
+
+              {!teamRequirements.hasConflict && (
+                <div className="space-y-4">
+                  {(formData.teamMembers || []).map((member, index) => (
                   <div key={index} className="p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-red-500/20 w-full overflow-hidden">
                     <div className="flex justify-between items-center mb-3">
                       <h4 className="text-white font-medium">Team Member {index + 2}</h4>
@@ -886,6 +916,7 @@ export default function RegistrationForm({
                   }
                 </button>
               </div>
+              )}
             </div>
           )}
 

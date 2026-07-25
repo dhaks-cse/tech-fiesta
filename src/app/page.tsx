@@ -8,7 +8,7 @@ import { Event, Workshop, SelectedItem } from "@/types";
 import { events } from "@/data/events";
 import { workshops } from "@/data/workshops";
 import { Mail, Phone, MapPin } from "lucide-react";
-import { FaWhatsapp, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { FaInstagram, FaLinkedin } from "react-icons/fa";
 
 // ─── Statically loaded (tiny, needed immediately) ────────────────────────────
 import LoadingScreen from "@/components/LoadingScreen";
@@ -770,8 +770,8 @@ export default function Home() {
                                 <Phone className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                                 <div>
                                   <h4 className="text-[10px] text-gray-500 font-mono uppercase tracking-wider">Helpline</h4>
-                                  <a href="tel:+919480856830" className="text-white hover:text-red-400 text-sm font-semibold">
-                                    +91 94808 56830
+                                  <a href="tel:+918667846929" className="text-white hover:text-red-400 text-sm font-semibold">
+                                    +91 86678 46929
                                   </a>
                                 </div>
                               </div>
@@ -797,9 +797,6 @@ export default function Home() {
                                 </a>
                                 <a href="https://www.linkedin.com/company/club-asymmetric/" target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/5 border border-white/10 hover:border-red-500/50 hover:text-red-400 rounded-lg text-gray-300 transition-all duration-300">
                                   <FaLinkedin className="w-4 h-4" />
-                                </a>
-                                <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/5 border border-white/10 hover:border-red-500/50 hover:text-red-400 rounded-lg text-gray-300 transition-all duration-300">
-                                  <FaWhatsapp className="w-4 h-4" />
                                 </a>
                               </div>
                             </div>

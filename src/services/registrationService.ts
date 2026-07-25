@@ -129,12 +129,9 @@ export async function submitRegistration(
     }
   } catch (error) {
     console.error("Error submitting registration to API:", error);
-    // Fallback registration creation in case the backend is temporarily down during verification
-    const registrationId = `TF-ODYSSEY-FALLBACK-${uuidv4().substr(0, 8).toUpperCase()}`;
     return {
-      success: true,
-      registrationId,
-      message: `Registration submitted successfully (Fallback Mode)! Save your registration ID: ${registrationId}`,
+      success: false,
+      message: "Registration failed due to network error. Please check your connection and try again.",
     };
   }
 }
